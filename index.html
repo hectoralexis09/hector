@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Registro de Citas</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .pantalla {
+            display: none;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .pantalla.activa {
+            display: flex;
+        }
+
+        .login {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .login h1 {
+            color: #1e3a8a;
+            margin-bottom: 25px;
+        }
+
+        .contenedor {
+            background: white;
+            width: 100%;
+            max-width: 1000px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #334155;
+            margin: 20px 0 15px;
+        }
+
+        .formulario {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .campo input,
+        .campo select,
+        .campo textarea {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .campo textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .completo {
+            grid-column: 1 / 3;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .btn-principal {
+            background: #2563eb;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-principal:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-salir {
+            background: #dc2626;
+            color: white;
+            float: right;
+        }
+
+        .btn-salir:hover {
+            background: #b91c1c;
+        }
+
+        .busqueda {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .busqueda input {
+            flex: 1;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .mensaje {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            .formulario {
+                grid-template-columns: 1fr;
+            }
+
+            .completo {
+                grid-column: 1;
+            }
+
+            .busqueda {
+                flex-direction: column;
+            }
+
+            .btn-salir {
+                float: none;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========================= -->
+    <!-- PANTALLA 1: INICIO -->
+    <!-- ========================= -->
+
+    <section id="pantallaInicio" class="pantalla activa">
+
+        <div class="login">
+
+            <h1>Inicio de sesión</h1>
+
+            <form id="formLogin">
+
+                <div class="campo">
+                    <label>Administrador</label>
+                    <input
+                        type="text"
+                        id="admin"
+                        placeholder="Ingrese el administrador"
+                        required
+                    >
+                </div>
+
+                <br>
+
+                <div class="campo">
+                    <label>Contraseña</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Ingrese la contraseña"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-principal">
+                    Iniciar sesión
+                </button>
+
+                <p id="mensajeLogin" class="mensaje"></p>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- PANTALLA 2: CITAS -->
+    <!-- ========================= -->
+
+    <section id="pantallaCitas" class="pantalla">
+
+        <div class="contenedor">
+
+            <button class="btn-salir" onclick="cerrarSesion()">
+                Cerrar sesión
+            </button>
+
+            <h1>Registro de citas</h1>
+
+            <p>
+                Registra, busca y consulta las citas almacenadas.
+            </p>
+
+
+            <!-- FORMULARIO -->
+
+            <h2>Registrar nueva cita</h2>
+
+            <form id="formCita" class="formulario">
+
+                <div class="campo">
+                    <label>Nombre</label>
+                    <input
+                        type="text"
+                        id="nombre"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        id="correo"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Especialidad</label>
+                    <input
+                        type="text"
+                        id="especialidad"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Grupo</label>
+                    <input
+                        type="text"
+                        id="grupo"
+                        required
+                    >
+                </div>
+
+                <div class="campo completo">
+                    <label>Motivo de la cita</label>
+                    <textarea
+                        id="motivo"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="campo">
+                    <label>Fecha</label>
+                    <input
+                        type="date"
+                        id="fecha"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Hora</label>
+                    <input
+                        type="time"
+                        id="hora"
+                        required
+                    >
+                </div>
+
+                <div class="campo completo">
+
+                    <button
+                        type="submit"
+                        class="btn-principal"
+                    >
+                        Registrar cita
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <!-- BUSCAR -->
+
+            <h2>Buscar cita</h2>
+
+            <div class="busqueda">
+
+                <input
+                    type="text"
+                    id="buscar"
+                    placeholder="Buscar por nombre o correo"
+                    oninput="buscarCita()"
+                >
+
+            </div>
+
+
+            <!-- LISTA DE CITAS -->
+
+            <h2>Citas registradas</h2>
+
+            <div class="tabla-contenedor">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Especialidad</th>
+                            <th>Grupo</th>
+                            <th>Motivo</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="listaCitas"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script>
+
+        // =========================
+        // DATOS DEL ADMINISTRADOR
+        // =========================
+
+        const ADMIN = "admin";
+        const PASSWORD = "12345";
+
+
+        // =========================
+        // CAMBIAR DE PANTALLA
+        // =========================
+
+        function mostrarPantalla(id) {
+
+            document.querySelectorAll(".pantalla")
+                .forEach(p => p.classList.remove("activa"));
+
+            document.getElementById(id)
+                .classList.add("activa");
+        }
+
+
+        // =========================
+        // INICIO DE SESIÓN
+        // =========================
+
+        document.getElementById("formLogin")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                const admin =
+                    document.getElementById("admin").value;
+
+                const password =
+                    document.getElementById("password").value;
+
+                const mensaje =
+                    document.getElementById("mensajeLogin");
+
+
+                if (admin === ADMIN && password === PASSWORD) {
+
+                    mensaje.style.color = "green";
+                    mensaje.textContent =
+                        "Inicio de sesión correcto.";
+
+                    setTimeout(() => {
+
+                        mostrarPantalla("pantallaCitas");
+
+                    }, 500);
+
+                } else {
+
+                    mensaje.style.color = "red";
+                    mensaje.textContent =
+                        "Administrador o contraseña incorrectos.";
+
+                }
+
+            });
+
+
+        // =========================
+        // GUARDAR CITA
+        // =========================
+
+        document.getElementById("formCita")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                const cita = {
+
+                    nombre:
+                        document.getElementById("nombre").value,
+
+                    correo:
+                        document.getElementById("correo").value,
+
+                    especialidad:
+                        document.getElementById("especialidad").value,
+
+                    grupo:
+                        document.getElementById("grupo").value,
+
+                    motivo:
+                        document.getElementById("motivo").value,
+
+                    fecha:
+                        document.getElementById("fecha").value,
+
+                    hora:
+                        document.getElementById("hora").value
+
+                };
+
+
+                let citas =
+                    JSON.parse(localStorage.getItem("citas")) || [];
+
+
+                citas.push(cita);
+
+
+                localStorage.setItem(
+                    "citas",
+                    JSON.stringify(citas)
+                );
+
+
+                alert("La cita fue registrada correctamente.");
+
+
+                document.getElementById("formCita").reset();
+
+
+                mostrarCitas();
+
+            });
+
+
+        // =========================
+        // MOSTRAR CITAS
+        // =========================
+
+        function mostrarCitas(citasFiltradas = null) {
+
+            const citas =
+                citasFiltradas ||
+                JSON.parse(localStorage.getItem("citas")) ||
+                [];
+
+            const lista =
+                document.getElementById("listaCitas");
+
+            lista.innerHTML = "";
+
+
+            citas.forEach(cita => {
+
+                const fila =
+                    document.createElement("tr");
+
+                fila.innerHTML = `
+
+                    <td>${cita.nombre}</td>
+
+                    <td>${cita.correo}</td>
+
+                    <td>${cita.especialidad}</td>
+
+                    <td>${cita.grupo}</td>
+
+                    <td>${cita.motivo}</td>
+
+                    <td>${cita.fecha}</td>
+
+                    <td>${cita.hora}</td>
+
+                `;
+
+                lista.appendChild(fila);
+
+            });
+
+        }
+
+
+        // =========================
+        // BUSCAR CITA
+        // =========================
+
+        function buscarCita() {
+
+            const texto =
+                document.getElementById("buscar")
+                .value
+                .toLowerCase();
+
+
+            const citas =
+                JSON.parse(localStorage.getItem("citas")) || [];
+
+
+            const resultados =
+                citas.filter(cita =>
+
+                    cita.nombre
+                        .toLowerCase()
+                        .includes(texto)
+
+                    ||
+
+                    cita.correo
+                        .toLowerCase()
+                        .includes(texto)
+
+                );
+
+
+            mostrarCitas(resultados);
+
+        }
+
+
+        // =========================
+        // CERRAR SESIÓN
+        // =========================
+
+        function cerrarSesion() {
+
+            document.getElementById("admin").value = "";
+            document.getElementById("password").value = "";
+
+            mostrarPantalla("pantallaInicio");
+
+        }
+
+
+        // Mostrar las citas al abrir
+        mostrarCitas();
+
+    </script>
+
+</body>
+</html>
